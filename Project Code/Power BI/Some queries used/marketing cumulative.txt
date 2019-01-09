@@ -1,0 +1,44 @@
+WITH PREP AS
+(
+  SELECT 
+  	d.date,
+    d.month,
+    d.months_ago,
+ 	ch.mkt_medium,
+  ch.mkt_channel,
+	SUM(sessions) as sessions,
+	COUNT(distinct m.lead_id) as leads,
+    SUM(lc_valid_leads) AS valid_leads,
+  	SUM(cost) AS cost
+FROM facts.marketing m
+LEFT JOIN dims.channels ch ON ch.utm_id = m.utm_id
+left join dims.dates d on d.date_id = m.date_id
+WHERE m.event_at > CURRENT_DATE - 65
+  AND d.month >= DATEADD(month, -2, GETDATE())
+$group(5) 
+)
+<%
+	var part = 'PARTITION BY month,mkt_medium,mkt_channel ORDER BY date ASC';
+	var frame = ' ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW'
+%>
+SELECT 
+  date,
+  month,
+  extract(day FROM date) AS day_of_month,
+  months_ago,
+  mkt_medium,
+  mkt_channel,
+  sessions,
+  leads,
+  valid_leads,
+  cost,
+  SUM(sessions) OVER (<%=part+frame%>) AS cumulative_sessions,
+  SUM(leads) OVER (<%=part+frame%>) AS cumulative_leads,
+  SUM(valid_leads) OVER (<%=part+frame%>)  AS cumulative_valid_leads,
+  SUM(cost) OVER(<%=part+frame%>) AS cumulative_cost,
+  LAG(sessions) OVER (<%=part%>) AS lag_sessions,
+  LAG(leads) OVER (<%=part%>) AS lag_leads,
+  LAG(valid_leads) OVER (<%=part%>)  AS lag_valid_leads,
+  LAG(cost) OVER(<%=part%>) AS lag_cost,
+  (extract(day FROM date) <= extract(day FROM CURRENT_DATE))::INT AS bin_lag_reference
+FROM PREP

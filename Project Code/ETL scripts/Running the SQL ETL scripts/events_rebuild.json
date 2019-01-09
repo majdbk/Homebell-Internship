@@ -1,0 +1,66 @@
+{
+	"version":"1.0.0",
+	"title":"Event Loader",
+	"params":{
+		"recreate":true
+	},
+	"sequence":[
+		{"t":"START","path":"01_events/00_start_load.sql"},
+		{"t":"facts.marketing","path":"other_scripts/XX_table_creatations/facts.marketing.sql"},
+		{"t":"Duplicates","path":"01_events/01_duplicates.sql"},
+		{"t":"Adgroup_UTMS_MAP","path":"01_events/02_scratch_adgroup_utm_map.sql","test":true},
+		{"t":"User_Mapping","path":"01_events/03a_user_map.sql"},
+		{"t":"Prep Channels","path":"01_events/03b_channels_prep.sql"},
+		{
+			"t":"Channels - Events",
+			"path":"01_events/03c_fill_channels.sql",
+			"params":{
+				"recreate":true,
+				"sourceTable":"scratch.channel_prep"
+			},
+			"test":true
+		},
+		{"title":"Events Sessions Map","path":"01_events/05_event_session_map.sql","test":true},
+		{"title":"Sessions Prep","path":"01_events/06a_session_prep.sql"},
+		{"title":"Sessions","path":"01_events/06b_sessions.sql","test":true},
+		{"title":"Onsite Conversions","path":"02_marketing/01_onsite_conversions.sql"},
+		{"t":"TV Channel","path":"02_marketing/00a_tv_channel.sql"},
+		{"t":"FB/GAW Prep","path":"02_marketing/00b_fb_gaw_spend_prep.sql"},
+		{"t":"Valid Leads","path":"02_marketing/00c_refined_valid_leads.sql"},
+		{
+			"t":"FB/GAW Dims",
+			"path":"01_events/03c_fill_channels.sql",
+			"params":{
+				"recreate":false,
+				"sourceTable":"scratch.mkt_spend"
+			},
+			"test":true
+		},
+		{"t":"FB/GAW Spend","path":"02_marketing/01_fb_gaw_spend.sql"},
+		{"t":"Offers","path":"dims/04_offers.sql"},
+		{"t":"Opportunities Scratch","path":"dims_scratch/opportunities.sql"},	
+		{"t":"Sales Rev","path":"facts/01_sales_revenue.sql","test":false},
+		{"t":"Conversion Path","path":"02_marketing/02_conversion_path.sql"},
+		{"t":"Mkt Return Prep","path":"02_marketing/03_mkt_return_prep.sql","test":true},
+		{"t":"Mkt Return","path":"02_marketing/04_mkt_return.sql"},
+		{"t":"Session Return","path":"02_marketing/05_session_conversions.sql"},
+		{"t":"TV Update","path":"02_marketing/06_tv_update.sql"},
+		{"t":"Unmatched Volumes","path":"facts/05_unmatched_volume.sql"},
+		{"t":"Payments","path":"facts/07_payments.sql"},
+		{"t":"lead_channels","path":"02_marketing/07_lead_channels.sql"},
+		{"t":"Opportunities","path":"dims/05_opportunities.sql"},
+		{"t":"LEADS FACTS","path":"facts/12_leads.sql"},
+		{"t":"Agents Leads mapping","path":"dims_scratch/agents_leads_mapping.sql"},
+		{"t":"Agents facts","path":"facts/17_agents.sql"},
+
+		{"t":"Partner Offers","path":"facts/20_partner_offers.sql"},
+		{"t":"Invoices","path":"facts/21_invoices.sql","test":true},
+		{"t":"Comm","path":"facts/22_sales_commissions.sql"},
+
+
+		{"t":"PBI UTM","path":"02_marketing/101_pbi_utm_id.sql","test":false},
+		{"t":"Manual Cost","path":"02_marketing/08_manual_cost_prep.sql"},
+		{"t":"Manual Cost","path":"02_marketing/09_manual_cost_channel_update.sql"},
+		{"t":"Manual Cost","path":"02_marketing/10_mkt_manual_cost.sql"}
+	]
+}

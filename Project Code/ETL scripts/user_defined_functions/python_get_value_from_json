@@ -1,0 +1,14 @@
+create or replace function f_get_value_from_key (key varchar, json_object varchar)
+  returns varchar
+stable
+as $$
+  import ast
+  result = None
+  if json_object is not None:
+    json_object = ast.literal_eval(json_object)
+    if key in json_object:
+      result = json_object[key]
+  return result
+$$ language plpythonu;
+
+
